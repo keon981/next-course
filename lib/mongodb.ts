@@ -1,6 +1,5 @@
 import { MongoClient } from "mongodb"
-
-const uri = process.env.MONGODB_URI ?? ""
+import { uri } from "./env"
 
 const options = {
   maxPoolSize: 10,
@@ -18,6 +17,7 @@ if (!global._mongoClientPromise) {
   global._mongoClientPromise = client.connect()
 }
 
+// eslint-disable-next-line prefer-const
 clientPromise = global._mongoClientPromise
 
 export default clientPromise

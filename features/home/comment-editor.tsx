@@ -8,11 +8,36 @@ import {
   DialogTrigger,
   DialogContent,
 } from "@/components/ui/dialog"
+import { addPost } from "@/servers/post"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
 function CommentEditor() {
+  // navigarion
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // state
+  const [isOpen, setIsOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
+
+  // query
+  const queryClient = useQueryClient()
+
+  // value
+  const currentpage = Number(searchParams.get("page") || 1)
+
+  const { mutate: addPostMutation, isPending } = useMutation({
+    mutationFn: addPost,
+    onSuccess() {
+      setIsOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["posts", 1] })
+
+      if (currentpage !== 1) router.push(`/?page=1`)
+    },
+  })
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -21,8 +46,17 @@ function CommentEditor() {
     setContent(e.target.value)
   }
 
+  const onPost = () => {
+    if (isPending) return
+    if (!title || !content) {
+      alert("Please fill in all fields")
+      return
+    }
+    addPostMutation({ title, content })
+  }
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="secondary" className="w-full">
           What&apos;s on your mind?
@@ -50,9 +84,7 @@ function CommentEditor() {
           <DialogClose asChild>
             <Button variant="secondary">Cancel</Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button>Post</Button>
-          </DialogClose>
+          <Button onClick={onPost}>Post</Button>
         </div>
       </DialogContent>
     </Dialog>
