@@ -1,10 +1,14 @@
-import Layout from "@/components/block/layout"
-import Content from "@/features/home/content"
+"use client"
 
-export default function Home() {
+import Layout from "@/components/block/layout"
+import Content from "./content"
+
+function PostPage() {
   return (
     <Layout>
       <Content />
     </Layout>
   )
 }
+
+export default PostPage
